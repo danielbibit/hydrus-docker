@@ -1,18 +1,26 @@
-FROM ubuntu:18.04
+FROM	ubuntu:20.04
 
-RUN apt-get update
+ENV	TZ=America/Sao_Paulo
 
-RUN apt-get install -y python3-dev python3-pip git
+RUN	ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN git clone https://github.com/hydrusnetwork/hydrus.git
+ADD	https://github.com/hydrusnetwork/hydrus/releases/download/v407/Hydrus.Network.407.-.Linux.-.Executable.tar.gz /tmp/
 
-WORKDIR hydrus
+WORKDIR	/tmp
 
-RUN git checkout tags/v407
+RUN	tar -xzvf Hydrus.Network.407.-.Linux.-.Executable.tar.gz
 
-RUN pip3 install scikit-build
+RUN	rm Hydrus.Network.407.-.Linux.-.Executable.tar.gz
 
-RUN pip3 install -r requirements.txt
+WORKDIR	hydrus/ network 
 
-RUN python3 client.py
+# Install vnc, xvfb in order to create a 'fake' display and firefox
+RUN	apt-get update
+RUN     apt-get install -y x11vnc xvfb 
+RUN     mkdir ~/.vnc
+
+# Setup a password
+RUN     x11vnc -storepasswd 1234 ~/.vnc/passwd
+
+RUN	./client
 
